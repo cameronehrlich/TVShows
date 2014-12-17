@@ -523,31 +523,28 @@
 #pragma mark Background workers
 - (void) setEpisodesForShow:(NSString *)showFeeds
 {
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    
-    NSMutableArray *feeds = [NSMutableArray arrayWithArray:[showFeeds componentsSeparatedByString:@"#"]];
-    
-    // Generate the full feeds for this suscription
-    for (int i = 0; i < [feeds count]; i++) {
-        NSString *feed = [TSRegexFun obtainFullFeed:[feeds objectAtIndex:i]];
-        [feeds replaceObjectAtIndex:i
-                         withObject:feed];
+    @autoreleasepool {
+        NSMutableArray *feeds = [NSMutableArray arrayWithArray:[showFeeds componentsSeparatedByString:@"#"]];
+        
+        // Generate the full feeds for this suscription
+        for (int i = 0; i < [feeds count]; i++) {
+            NSString *feed = [TSRegexFun obtainFullFeed:[feeds objectAtIndex:i]];
+            [feeds replaceObjectAtIndex:i
+                             withObject:feed];
+        }
+        
+        // Now we can trigger the time-expensive task
+        NSArray *results = [NSArray arrayWithObjects:showFeeds,
+                            [TSParseXMLFeeds parseEpisodesFromFeeds:feeds
+                                                    beingCustomShow:NO], nil];
+        
+        if ([results count] < 2) {
+            LogError(@"Could not download/parse feed(s) <%@>", showFeeds);
+            return;
+        }
+        
+        [self performSelectorOnMainThread:@selector(updateEpisodes:) withObject:results waitUntilDone:NO];
     }
-    
-    // Now we can trigger the time-expensive task
-    NSArray *results = [NSArray arrayWithObjects:showFeeds,
-                        [TSParseXMLFeeds parseEpisodesFromFeeds:feeds
-                                                beingCustomShow:NO], nil];
-    
-    if ([results count] < 2) {
-        LogError(@"Could not download/parse feed(s) <%@>", showFeeds);
-        [pool drain];
-        return;
-    }
-    
-    [self performSelectorOnMainThread:@selector(updateEpisodes:) withObject:results waitUntilDone:NO];
-    
-    [pool drain];
 }
 
 - (void) setPosterForShow:(NSArray *)arguments

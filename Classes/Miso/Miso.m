@@ -97,7 +97,6 @@
     [loader setCredentials:[oauthAPI credentials]];
     [loader loadSynchronously:YES];
 
-    [loader autorelease];
     [aRequest release];
 
     return [self jsonValue:[loader data]];
@@ -115,7 +114,6 @@
     [loader setCredentials:[oauthAPI credentials]];
     [loader loadSynchronously:YES];
     
-    [loader autorelease];
     [aRequest release];
     
     return [self jsonValue:[loader data]];
@@ -141,7 +139,6 @@
     [loader setCredentials:[oauthAPI credentials]];
     [loader loadSynchronously:YES];
     
-    [loader autorelease];
     [aRequest release];
     
     return [self jsonValue:[loader data]];
